@@ -7,3 +7,4 @@ build:
 
 test: build
 	bats acceptance/state.bats
+	bats acceptance/kill.bats

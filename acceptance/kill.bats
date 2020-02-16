@@ -1,5 +1,5 @@
-@test "state missing container ID" {
-  run pebble state
+@test "kill missing container ID" {
+  run pebble kill
 
   [ "$status" -eq 1 ]
 
@@ -8,8 +8,8 @@
   [[ "$output" == *"<container-id>"* ]]
 }
 
-@test "state for a non-existent container" {
-  run pebble state foo
+@test "kill for a non-existent container" {
+  run pebble kill foo SIGTERM
   [ "$status" -eq 1 ]
   [ "$output" = 'error: no such container' ]
 }
