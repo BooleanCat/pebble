@@ -7,8 +7,10 @@ build:
 
 test: test-unit build
 	bats acceptance/state.bats
-	bats acceptance/kill.bats
+	bats acceptance/create.bats
 	bats acceptance/start.bats
+	bats acceptance/kill.bats
+	bats acceptance/delete.bats
 
 test-unit:
 	cargo test
