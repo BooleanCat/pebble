@@ -1,8 +1,10 @@
 use structopt::StructOpt;
 use structopt::clap;
+use libpebble::Signal;
 
 #[derive(Debug, StructOpt)]
-#[structopt(name = "pebble", about = "An OCI container runtime")]
+#[structopt(name = "pebble")]
+/// An OCI container runtime
 struct Opt {
     #[structopt(subcommand)]
     command: Subcommand,
@@ -24,7 +26,7 @@ enum Subcommand {
         id: String,
 
         #[structopt(default_value = "SIGTERM")]
-        signal: String,
+        signal: Signal,
     },
 
     #[structopt(no_version)]
@@ -38,7 +40,7 @@ enum Subcommand {
 fn main() {
     match Opt::from_args().command {
         Subcommand::State{id} => { state(&id) },
-        Subcommand::Kill{id, signal} => { kill(&id, &signal) },
+        Subcommand::Kill{id, signal} => { kill(&id, signal) },
         Subcommand::Start{id} => { start(&id) },
     }
 }
@@ -47,7 +49,7 @@ fn state(_: &str) {
     clap::Error::with_description("no such container", clap::ErrorKind::InvalidValue).exit();
 }
 
-fn kill(_: &str, _: &str) {
+fn kill(_: &str, _: Signal) {
     clap::Error::with_description("no such container", clap::ErrorKind::InvalidValue).exit();
 }
 

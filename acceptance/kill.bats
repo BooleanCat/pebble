@@ -13,3 +13,9 @@
   [ "$status" -eq 1 ]
   [ "$output" = 'error: no such container' ]
 }
+
+@test "kill with unknown signal" {
+  run pebble kill foo SIGFOO
+  [ "$status" -eq 1 ]
+  [ "$output" = "error: Invalid value for '<signal>': unknown signal" ]
+}

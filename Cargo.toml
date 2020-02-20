@@ -4,7 +4,14 @@ version = "0.1.0"
 authors = ["BooleanCat <thgodkin@gmail.com>"]
 edition = "2018"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[lib]
+name = "libpebble"
+path = "src/lib.rs"
+
+[[bin]]
+name = "pebble"
+path = "src/bin.rs"
 
 [dependencies]
 structopt = {version = "0.3"}
+libc = {version = "0.2"}

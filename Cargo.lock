@@ -67,6 +67,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 name = "pebble"
 version = "0.1.0"
 dependencies = [
+ "libc 0.2.66 (registry+https://github.com/rust-lang/crates.io-index)",
  "structopt 0.3.9 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
