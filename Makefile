@@ -1,4 +1,4 @@
-.PHONY = test build
+.PHONY = test build test-unit
 
 export PATH := target/release:$(PATH)
 
