@@ -17,5 +17,5 @@
 @test "kill with unknown signal" {
   run pebble kill foo SIGFOO
   [ "$status" -eq 1 ]
-  [ "$output" = "error: Invalid value for '<signal>': unknown signal" ]
+  [[ "$output" == "error: Invalid value for '<signal>'"* ]]
 }
