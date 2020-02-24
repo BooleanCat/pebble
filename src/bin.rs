@@ -1,7 +1,9 @@
 use std::path::PathBuf;
+use std::fs::File;
 use structopt::StructOpt;
 use structopt::clap;
-use libpebble::Signal;
+use libc;
+use libpebble::{Signal, Config};
 
 #[derive(Debug, StructOpt)]
 #[structopt(name = "pebble")]
@@ -60,7 +62,7 @@ fn main() {
         Subcommand::State{id} => state(&id),
         Subcommand::Create{id, path} => create(&id, &path),
         Subcommand::Start{id} => start(&id),
-        Subcommand::Kill{id, signal} => kill(&id, signal),
+        Subcommand::Kill{id, signal} => kill(&id, signal.into()),
         Subcommand::Delete{id} => delete(&id),
     }
 }
@@ -69,7 +71,17 @@ fn state(_: &str) {
     clap::Error::with_description("no such container", clap::ErrorKind::InvalidValue).exit();
 }
 
-fn create(_: &str, _: &PathBuf) {
+fn create(_: &str, path: &PathBuf) {
+    let file = File::open(path).unwrap_or_else(|err| clap::Error::with_description(
+        &format!("open {:?}: {}", path, err),
+        clap::ErrorKind::Io
+    ).exit());
+
+    let _: Config = serde_json::from_reader(file).unwrap_or_else(|err| clap::Error::with_description(
+        &format!("parse {:?}: {}", path, err),
+        clap::ErrorKind::Format
+    ).exit());
+
     clap::Error::with_description("not implemented", clap::ErrorKind::InvalidValue).exit();
 }
 
@@ -77,7 +89,7 @@ fn start(_: &str) {
     clap::Error::with_description("no such container", clap::ErrorKind::InvalidValue).exit();
 }
 
-fn kill(_: &str, _: Signal) {
+fn kill(_: &str, _: libc::c_int) {
     clap::Error::with_description("no such container", clap::ErrorKind::InvalidValue).exit();
 }
 

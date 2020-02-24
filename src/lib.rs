@@ -1,5 +1,6 @@
 use libc;
 use structopt::clap::arg_enum;
+use serde::Deserialize;
 
 arg_enum! {
     #[derive(Debug)]
@@ -78,4 +79,18 @@ impl Into<libc::c_int> for Signal {
             Self::SIGSYS => libc::SIGSYS,
         }
     }
+}
+
+#[serde(rename_all = "camelCase")]
+#[derive(Deserialize, Debug)]
+pub struct ConfigRoot {
+    pub path: String,
+    pub read_only: Option<bool>,
+}
+
+#[serde(rename_all = "camelCase")]
+#[derive(Deserialize, Debug)]
+pub struct Config {
+    pub oci_version: String,
+    pub root: ConfigRoot,
 }
