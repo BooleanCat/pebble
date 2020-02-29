@@ -1,9 +1,9 @@
-use std::path::PathBuf;
-use std::fs::File;
-use structopt::StructOpt;
-use structopt::clap;
 use libc;
-use libpebble::{Signal, Config};
+use libpebble::{Config, Signal};
+use std::fs::File;
+use std::path::PathBuf;
+use structopt::clap;
+use structopt::StructOpt;
 
 #[derive(Debug, StructOpt)]
 #[structopt(name = "pebble")]
@@ -53,17 +53,17 @@ enum Subcommand {
     /// Delete a container
     Delete {
         #[structopt(name = "container-id")]
-        id: String
-    }
+        id: String,
+    },
 }
 
 fn main() {
     match Opt::from_args().command {
-        Subcommand::State{id} => state(&id),
-        Subcommand::Create{id, path} => create(&id, &path),
-        Subcommand::Start{id} => start(&id),
-        Subcommand::Kill{id, signal} => kill(&id, signal.into()),
-        Subcommand::Delete{id} => delete(&id),
+        Subcommand::State { id } => state(&id),
+        Subcommand::Create { id, path } => create(&id, &path),
+        Subcommand::Start { id } => start(&id),
+        Subcommand::Kill { id, signal } => kill(&id, signal.into()),
+        Subcommand::Delete { id } => delete(&id),
     }
 }
 
@@ -72,15 +72,18 @@ fn state(_: &str) {
 }
 
 fn create(_: &str, path: &PathBuf) {
-    let file = File::open(path).unwrap_or_else(|err| clap::Error::with_description(
-        &format!("open {:?}: {}", path, err),
-        clap::ErrorKind::Io
-    ).exit());
+    let file = File::open(path).unwrap_or_else(|err| {
+        clap::Error::with_description(&format!("open {:?}: {}", path, err), clap::ErrorKind::Io)
+            .exit()
+    });
 
-    let _: Config = serde_json::from_reader(file).unwrap_or_else(|err| clap::Error::with_description(
-        &format!("parse {:?}: {}", path, err),
-        clap::ErrorKind::Format
-    ).exit());
+    let _: Config = serde_json::from_reader(file).unwrap_or_else(|err| {
+        clap::Error::with_description(
+            &format!("parse {:?}: {}", path, err),
+            clap::ErrorKind::Format,
+        )
+        .exit()
+    });
 
     clap::Error::with_description("not implemented", clap::ErrorKind::InvalidValue).exit();
 }

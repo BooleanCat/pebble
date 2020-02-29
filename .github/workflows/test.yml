@@ -1,0 +1,35 @@
+name: test
+on: [push]
+jobs:
+  build:
+    name: 'test'
+    runs-on: 'ubuntu-latest'
+    steps:
+    - uses: 'actions/checkout@v2'
+    - uses: 'actions-rs/toolchain@v1'
+      with:
+        profile: 'minimal'
+        override: true
+        components: 'rustfmt, clippy'
+        toolchain: 'stable'
+    - name: 'install bats'
+      run: 'sudo apt install --yes bats'
+
+    - name: 'cache: cargo registry'
+      uses: 'actions/cache@v1'
+      with:
+        path: '~/.cargo/registry'
+        key: ${{ runner.os }}-cargo-registry-${{ hashFiles('**/Cargo.lock') }}
+    - name: 'cache: cargo index'
+      uses: 'actions/cache@v1'
+      with:
+        path: '~/.cargo/git'
+        key: ${{ runner.os }}-cargo-index-${{ hashFiles('**/Cargo.lock') }}
+    - name: 'cache: cargo build'
+      uses: 'actions/cache@v1'
+      with:
+        path: 'target'
+        key: ${{ runner.os }}-cargo-build-target-${{ hashFiles('**/Cargo.lock') }}
+
+    - name: 'test'
+      run: 'make test'

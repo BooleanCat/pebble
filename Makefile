@@ -1,11 +1,11 @@
-.PHONY = test build test-unit
+.PHONY = test build test-unit check
 
 export PATH := target/release:$(PATH)
 
 build:
 	cargo build --release
 
-test: test-unit build
+test: check test-unit build
 	bats acceptance/state.bats
 	bats acceptance/create.bats
 	bats acceptance/start.bats
@@ -14,3 +14,8 @@ test: test-unit build
 
 test-unit:
 	cargo test
+
+check:
+	cargo check
+	cargo fmt -- --check
+	cargo clippy
