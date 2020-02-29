@@ -1,6 +1,6 @@
 use libc;
-use structopt::clap::arg_enum;
 use serde::Deserialize;
+use structopt::clap::arg_enum;
 
 arg_enum! {
     #[derive(Debug)]
