@@ -1,12 +1,11 @@
 use std::process::Command;
 
+const PEBBLE: &'static str = "target/release/pebble";
+
 #[test]
 #[ignore]
 fn state_missing_container_id() {
-    let output = Command::new("target/release/pebble")
-        .args(&["state"])
-        .output()
-        .unwrap();
+    let output = Command::new(PEBBLE).args(&["state"]).output().unwrap();
 
     let output = String::from_utf8(output.stderr).unwrap();
 
@@ -17,7 +16,7 @@ fn state_missing_container_id() {
 #[test]
 #[ignore]
 fn state_no_such_container() {
-    let output = Command::new("target/release/pebble")
+    let output = Command::new(PEBBLE)
         .args(&["state", "foo"])
         .output()
         .unwrap();

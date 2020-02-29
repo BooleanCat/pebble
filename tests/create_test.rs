@@ -1,12 +1,11 @@
 use std::process::Command;
 
+const PEBBLE: &'static str = "target/release/pebble";
+
 #[test]
 #[ignore]
 fn create_missing_container_id() {
-    let output = Command::new("target/release/pebble")
-        .args(&["create"])
-        .output()
-        .unwrap();
+    let output = Command::new(PEBBLE).args(&["create"]).output().unwrap();
 
     let output = String::from_utf8(output.stderr).unwrap();
 
@@ -17,7 +16,7 @@ fn create_missing_container_id() {
 #[test]
 #[ignore]
 fn create_missing_bundle_path() {
-    let output = Command::new("target/release/pebble")
+    let output = Command::new(PEBBLE)
         .args(&["create", "foo"])
         .output()
         .unwrap();
@@ -31,7 +30,7 @@ fn create_missing_bundle_path() {
 #[test]
 #[ignore]
 fn create_bundle_not_found() {
-    let output = Command::new("target/release/pebble")
+    let output = Command::new(PEBBLE)
         .args(&["create", "foo", "bar"])
         .output()
         .unwrap();
@@ -44,7 +43,7 @@ fn create_bundle_not_found() {
 #[test]
 #[ignore]
 fn create_bad_bundle() {
-    let output = Command::new("target/release/pebble")
+    let output = Command::new(PEBBLE)
         .args(&["create", "foo", "tests/fixtures/bundle-junk.json"])
         .output()
         .unwrap();

@@ -1,12 +1,11 @@
 use std::process::Command;
 
+const PEBBLE: &'static str = "target/release/pebble";
+
 #[test]
 #[ignore]
 fn delete_missing_container_id() {
-    let output = Command::new("target/release/pebble")
-        .args(&["delete"])
-        .output()
-        .unwrap();
+    let output = Command::new(PEBBLE).args(&["delete"]).output().unwrap();
 
     let output = String::from_utf8(output.stderr).unwrap();
 
@@ -17,7 +16,7 @@ fn delete_missing_container_id() {
 #[test]
 #[ignore]
 fn delete_no_such_container() {
-    let output = Command::new("target/release/pebble")
+    let output = Command::new(PEBBLE)
         .args(&["delete", "foo"])
         .output()
         .unwrap();
