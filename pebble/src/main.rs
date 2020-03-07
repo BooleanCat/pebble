@@ -1,4 +1,3 @@
-use libc;
 use libpebble::{Config, Signal};
 use std::fs::File;
 use std::path::PathBuf;
@@ -62,7 +61,7 @@ fn main() {
         Subcommand::State { id } => state(&id),
         Subcommand::Create { id, path } => create(&id, &path),
         Subcommand::Start { id } => start(&id),
-        Subcommand::Kill { id, signal } => kill(&id, signal.into()),
+        Subcommand::Kill { id, signal } => kill(&id, signal),
         Subcommand::Delete { id } => delete(&id),
     }
 }
@@ -92,7 +91,7 @@ fn start(_: &str) {
     clap::Error::with_description("no such container", clap::ErrorKind::InvalidValue).exit();
 }
 
-fn kill(_: &str, _: libc::c_int) {
+fn kill(_: &str, _: Signal) {
     clap::Error::with_description("no such container", clap::ErrorKind::InvalidValue).exit();
 }
 
