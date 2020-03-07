@@ -5,11 +5,13 @@ export PATH := target/release:$(PATH)
 build:
 	cargo build --release
 
-test: check test-unit build
-	cargo test -- --ignored
+test: check test-libpebble build test-pebble
 
-test-unit:
-	cargo test
+test-libpebble:
+	cargo test -p libpebble
+
+test-pebble:
+	cargo test -p pebble
 
 check:
 	cargo check

@@ -1,9 +1,8 @@
 use std::process::Command;
 
-const PEBBLE: &'static str = "target/release/pebble";
+const PEBBLE: &'static str = "../target/release/pebble";
 
 #[test]
-#[ignore]
 fn kill_missing_container_id() {
     let output = Command::new(PEBBLE).args(&["kill"]).output().unwrap();
 
@@ -14,7 +13,6 @@ fn kill_missing_container_id() {
 }
 
 #[test]
-#[ignore]
 fn kill_unknown_signal() {
     let output = Command::new(PEBBLE)
         .args(&["kill", "foo", "SIGFOO"])
@@ -27,7 +25,6 @@ fn kill_unknown_signal() {
 }
 
 #[test]
-#[ignore]
 fn kill_no_such_container() {
     let output = Command::new(PEBBLE)
         .args(&["kill", "foo"])

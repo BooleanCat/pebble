@@ -1,9 +1,8 @@
 use std::process::Command;
 
-const PEBBLE: &'static str = "target/release/pebble";
+const PEBBLE: &'static str = "../target/release/pebble";
 
 #[test]
-#[ignore]
 fn start_missing_container_id() {
     let output = Command::new(PEBBLE).args(&["start"]).output().unwrap();
 
@@ -14,7 +13,6 @@ fn start_missing_container_id() {
 }
 
 #[test]
-#[ignore]
 fn start_no_such_container() {
     let output = Command::new(PEBBLE)
         .args(&["start", "foo"])
