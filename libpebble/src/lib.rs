@@ -1,5 +1,6 @@
 use libc;
 use serde::Deserialize;
+use std::{error, fmt};
 use structopt::clap::arg_enum;
 
 arg_enum! {
@@ -93,4 +94,45 @@ pub struct ConfigRoot {
 pub struct Config {
     pub oci_version: String,
     pub root: ConfigRoot,
+}
+
+#[derive(Debug)]
+pub enum Error {
+    NotImplemented,
+    NoSuchContainer,
+}
+
+impl fmt::Display for Error {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(
+            f,
+            "{}",
+            match self {
+                Self::NotImplemented => "not implemented",
+                Self::NoSuchContainer => "no such container",
+            }
+        )
+    }
+}
+
+impl error::Error for Error {}
+
+pub fn state(_: &str) -> Result<(), Error> {
+    Err(Error::NoSuchContainer)
+}
+
+pub fn create(_: &str, _: Config) -> Result<(), Error> {
+    Err(Error::NotImplemented)
+}
+
+pub fn start(_: &str) -> Result<(), Error> {
+    Err(Error::NoSuchContainer)
+}
+
+pub fn kill(_: &str, _: Signal) -> Result<(), Error> {
+    Err(Error::NoSuchContainer)
+}
+
+pub fn delete(_: &str) -> Result<(), Error> {
+    Err(Error::NoSuchContainer)
 }

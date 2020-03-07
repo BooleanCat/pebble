@@ -21,5 +21,5 @@ fn delete_no_such_container() {
 
     let output = String::from_utf8(output.stderr).unwrap();
 
-    assert!(output.contains("error: no such container"));
+    assert!(output.contains(r#"error: delete "foo": no such container"#));
 }

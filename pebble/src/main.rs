@@ -1,4 +1,4 @@
-use libpebble::{Config, Signal};
+use libpebble::Signal;
 use std::fs::File;
 use std::path::PathBuf;
 use structopt::clap;
@@ -6,6 +6,7 @@ use structopt::StructOpt;
 
 #[derive(Debug, StructOpt)]
 #[structopt(name = "pebble")]
+#[structopt(setting = structopt::clap::AppSettings::ColoredHelp)]
 /// An OCI container runtime
 struct Opt {
     #[structopt(subcommand)]
@@ -66,17 +67,26 @@ fn main() {
     }
 }
 
-fn state(_: &str) {
-    clap::Error::with_description("no such container", clap::ErrorKind::InvalidValue).exit();
+fn state(id: &str) {
+    match libpebble::state(id) {
+        Err(err) => {
+            clap::Error::with_description(
+                &format!(r#"state "{}": {}"#, id, err),
+                clap::ErrorKind::Io,
+            )
+            .exit();
+        }
+        _ => unreachable!(),
+    }
 }
 
-fn create(_: &str, path: &PathBuf) {
+fn create(id: &str, path: &PathBuf) {
     let file = File::open(path).unwrap_or_else(|err| {
         clap::Error::with_description(&format!("open {:?}: {}", path, err), clap::ErrorKind::Io)
             .exit()
     });
 
-    let _: Config = serde_json::from_reader(file).unwrap_or_else(|err| {
+    let config = serde_json::from_reader(file).unwrap_or_else(|err| {
         clap::Error::with_description(
             &format!("parse {:?}: {}", path, err),
             clap::ErrorKind::Format,
@@ -84,17 +94,49 @@ fn create(_: &str, path: &PathBuf) {
         .exit()
     });
 
-    clap::Error::with_description("not implemented", clap::ErrorKind::InvalidValue).exit();
+    match libpebble::create(id, config) {
+        Err(err) => {
+            clap::Error::with_description(&format!("create: {}", err), clap::ErrorKind::Io).exit();
+        }
+        _ => unreachable!(),
+    }
 }
 
-fn start(_: &str) {
-    clap::Error::with_description("no such container", clap::ErrorKind::InvalidValue).exit();
+fn start(id: &str) {
+    match libpebble::start(id) {
+        Err(err) => {
+            clap::Error::with_description(
+                &format!(r#"start "{}": {}"#, id, err),
+                clap::ErrorKind::Io,
+            )
+            .exit();
+        }
+        _ => unreachable!(),
+    }
 }
 
-fn kill(_: &str, _: Signal) {
-    clap::Error::with_description("no such container", clap::ErrorKind::InvalidValue).exit();
+fn kill(id: &str, signal: Signal) {
+    match libpebble::kill(id, signal) {
+        Err(err) => {
+            clap::Error::with_description(
+                &format!(r#"kill "{}": {}"#, id, err),
+                clap::ErrorKind::Io,
+            )
+            .exit();
+        }
+        _ => unreachable!(),
+    }
 }
 
-fn delete(_: &str) {
-    clap::Error::with_description("no such container", clap::ErrorKind::InvalidValue).exit();
+fn delete(id: &str) {
+    match libpebble::delete(id) {
+        Err(err) => {
+            clap::Error::with_description(
+                &format!(r#"delete "{}": {}"#, id, err),
+                clap::ErrorKind::Io,
+            )
+            .exit();
+        }
+        _ => unreachable!(),
+    }
 }

@@ -33,5 +33,5 @@ fn kill_no_such_container() {
 
     let output = String::from_utf8(output.stderr).unwrap();
 
-    assert!(output.contains("error: no such container"));
+    assert!(output.contains(r#"error: kill "foo": no such container"#));
 }
