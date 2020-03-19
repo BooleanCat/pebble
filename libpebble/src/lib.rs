@@ -1,86 +1,8 @@
 use libc;
+use nix::unistd;
 use serde::Deserialize;
-use std::{error, fmt};
-use structopt::clap::arg_enum;
-
-arg_enum! {
-    #[derive(Debug)]
-    pub enum Signal {
-        SIGHUP,
-        SIGINT,
-        SIGQUIT,
-        SIGILL,
-        SIGTRAP,
-        SIGABRT,
-        SIGIOT,
-        SIGBUS,
-        SIGFPE,
-        SIGKILL,
-        SIGUSR1,
-        SIGSEGV,
-        SIGUSR2,
-        SIGPIPE,
-        SIGALRM,
-        SIGTERM,
-        SIGSTKFLT,
-        SIGCHLD,
-        SIGCONT,
-        SIGSTOP,
-        SIGTSTP,
-        SIGTTIN,
-        SIGTTOU,
-        SIGURG,
-        SIGXCPU,
-        SIGXFSZ,
-        SIGVTALRM,
-        SIGPROF,
-        SIGWINCH,
-        SIGIO,
-        SIGPOLL,
-        SIGPWR,
-        SIGSYS,
-    }
-}
-
-impl Into<libc::c_int> for Signal {
-    fn into(self) -> libc::c_int {
-        match self {
-            Self::SIGHUP => libc::SIGHUP,
-            Self::SIGINT => libc::SIGINT,
-            Self::SIGQUIT => libc::SIGQUIT,
-            Self::SIGILL => libc::SIGILL,
-            Self::SIGTRAP => libc::SIGTRAP,
-            Self::SIGABRT => libc::SIGABRT,
-            Self::SIGIOT => libc::SIGIOT,
-            Self::SIGBUS => libc::SIGBUS,
-            Self::SIGFPE => libc::SIGFPE,
-            Self::SIGKILL => libc::SIGKILL,
-            Self::SIGUSR1 => libc::SIGUSR1,
-            Self::SIGSEGV => libc::SIGSEGV,
-            Self::SIGUSR2 => libc::SIGUSR2,
-            Self::SIGPIPE => libc::SIGPIPE,
-            Self::SIGALRM => libc::SIGALRM,
-            Self::SIGTERM => libc::SIGTERM,
-            Self::SIGSTKFLT => libc::SIGSTKFLT,
-            Self::SIGCHLD => libc::SIGCHLD,
-            Self::SIGCONT => libc::SIGCONT,
-            Self::SIGSTOP => libc::SIGSTOP,
-            Self::SIGTSTP => libc::SIGTSTP,
-            Self::SIGTTIN => libc::SIGTTIN,
-            Self::SIGTTOU => libc::SIGTTOU,
-            Self::SIGURG => libc::SIGURG,
-            Self::SIGXCPU => libc::SIGXCPU,
-            Self::SIGXFSZ => libc::SIGXFSZ,
-            Self::SIGVTALRM => libc::SIGVTALRM,
-            Self::SIGPROF => libc::SIGPROF,
-            Self::SIGWINCH => libc::SIGWINCH,
-            Self::SIGIO => libc::SIGIO,
-            Self::SIGPOLL => libc::SIGPOLL,
-            Self::SIGPWR => libc::SIGPWR,
-            Self::SIGSYS => libc::SIGSYS,
-        }
-    }
-}
+use snafu::{ResultExt, Snafu};
+use std::{fs, io};
 
 #[serde(rename_all = "camelCase")]
 #[derive(Deserialize, Debug)]
@@ -96,26 +18,35 @@ pub struct Config {
     pub root: ConfigRoot,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Snafu)]
 pub enum Error {
+    #[snafu_display("not implemented")]
     NotImplemented,
+
+    #[snafu_display("no such container")]
     NoSuchContainer,
+
+    #[snafu_display("create directory: {}", "source")]
+    CreateDirectory { source: io::Error },
+
+    #[snafu_display("change owner: {}", "source")]
+    ChangeOwner { source: nix::Error },
 }
 
-impl fmt::Display for Error {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(
-            f,
-            "{}",
-            match self {
-                Self::NotImplemented => "not implemented",
-                Self::NoSuchContainer => "no such container",
-            }
-        )
+pub fn setup() -> Result<(), Error> {
+    if let Err(err) = fs::create_dir("/run/pebble") {
+        if err.kind() != io::ErrorKind::AlreadyExists {
+            return Err(Error::CreateDirectory { source: err });
+        }
     }
-}
 
-impl error::Error for Error {}
+    let uid = unistd::Uid::from_raw(5000);
+    let gid = unistd::Gid::from_raw(5000);
+
+    unistd::chown("/run/pebble", Some(uid), Some(gid)).context(ChangeOwner {})?;
+
+    Ok(())
+}
 
 pub fn state(_: &str) -> Result<(), Error> {
     Err(Error::NoSuchContainer)
@@ -129,7 +60,7 @@ pub fn start(_: &str) -> Result<(), Error> {
     Err(Error::NoSuchContainer)
 }
 
-pub fn kill(_: &str, _: Signal) -> Result<(), Error> {
+pub fn kill(_: &str, _: libc::c_int) -> Result<(), Error> {
     Err(Error::NoSuchContainer)
 }
 

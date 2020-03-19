@@ -1,8 +1,9 @@
-use libpebble::Signal;
+use libc;
+use libpebble;
 use std::fs::File;
 use std::path::PathBuf;
-use structopt::clap;
 use structopt::StructOpt;
+use structopt::{clap, clap::arg_enum};
 
 #[derive(Debug, StructOpt)]
 #[structopt(name = "pebble")]
@@ -15,6 +16,10 @@ struct Opt {
 
 #[derive(StructOpt, Debug)]
 enum Subcommand {
+    #[structopt(no_version)]
+    /// Perform one time system setup (requires root)
+    Setup {},
+
     #[structopt(no_version)]
     /// Query the state of a container
     State {
@@ -59,6 +64,7 @@ enum Subcommand {
 
 fn main() {
     match Opt::from_args().command {
+        Subcommand::Setup {} => setup(),
         Subcommand::State { id } => state(&id),
         Subcommand::Create { id, path } => create(&id, &path),
         Subcommand::Start { id } => start(&id),
@@ -67,17 +73,19 @@ fn main() {
     }
 }
 
-fn state(id: &str) {
-    match libpebble::state(id) {
-        Err(err) => {
-            clap::Error::with_description(
-                &format!(r#"state "{}": {}"#, id, err),
-                clap::ErrorKind::Io,
-            )
-            .exit();
-        }
-        _ => unreachable!(),
+fn setup() {
+    if let Err(err) = libpebble::setup() {
+        clap::Error::with_description(&format!("setup: {}", err), clap::ErrorKind::Io).exit();
     }
+}
+
+fn state(id: &str) {
+    if let Err(err) = libpebble::state(id) {
+        clap::Error::with_description(&format!(r#"state "{}": {}"#, id, err), clap::ErrorKind::Io)
+            .exit();
+    }
+
+    unreachable!();
 }
 
 fn create(id: &str, path: &PathBuf) {
@@ -94,49 +102,115 @@ fn create(id: &str, path: &PathBuf) {
         .exit()
     });
 
-    match libpebble::create(id, config) {
-        Err(err) => {
-            clap::Error::with_description(&format!("create: {}", err), clap::ErrorKind::Io).exit();
-        }
-        _ => unreachable!(),
+    if let Err(err) = libpebble::create(id, config) {
+        clap::Error::with_description(&format!("create: {}", err), clap::ErrorKind::Io).exit();
     }
+
+    unreachable!();
 }
 
 fn start(id: &str) {
-    match libpebble::start(id) {
-        Err(err) => {
-            clap::Error::with_description(
-                &format!(r#"start "{}": {}"#, id, err),
-                clap::ErrorKind::Io,
-            )
+    if let Err(err) = libpebble::start(id) {
+        clap::Error::with_description(&format!(r#"start "{}": {}"#, id, err), clap::ErrorKind::Io)
             .exit();
-        }
-        _ => unreachable!(),
     }
+
+    unreachable!();
 }
 
 fn kill(id: &str, signal: Signal) {
-    match libpebble::kill(id, signal) {
-        Err(err) => {
-            clap::Error::with_description(
-                &format!(r#"kill "{}": {}"#, id, err),
-                clap::ErrorKind::Io,
-            )
+    if let Err(err) = libpebble::kill(id, signal.into()) {
+        clap::Error::with_description(&format!(r#"kill "{}": {}"#, id, err), clap::ErrorKind::Io)
             .exit();
-        }
-        _ => unreachable!(),
     }
+
+    unreachable!();
 }
 
 fn delete(id: &str) {
-    match libpebble::delete(id) {
-        Err(err) => {
-            clap::Error::with_description(
-                &format!(r#"delete "{}": {}"#, id, err),
-                clap::ErrorKind::Io,
-            )
+    if let Err(err) = libpebble::delete(id) {
+        clap::Error::with_description(&format!(r#"delete "{}": {}"#, id, err), clap::ErrorKind::Io)
             .exit();
+    }
+
+    unreachable!();
+}
+
+arg_enum! {
+    #[derive(Debug)]
+    pub enum Signal {
+        SIGHUP,
+        SIGINT,
+        SIGQUIT,
+        SIGILL,
+        SIGTRAP,
+        SIGABRT,
+        SIGIOT,
+        SIGBUS,
+        SIGFPE,
+        SIGKILL,
+        SIGUSR1,
+        SIGSEGV,
+        SIGUSR2,
+        SIGPIPE,
+        SIGALRM,
+        SIGTERM,
+        SIGSTKFLT,
+        SIGCHLD,
+        SIGCONT,
+        SIGSTOP,
+        SIGTSTP,
+        SIGTTIN,
+        SIGTTOU,
+        SIGURG,
+        SIGXCPU,
+        SIGXFSZ,
+        SIGVTALRM,
+        SIGPROF,
+        SIGWINCH,
+        SIGIO,
+        SIGPOLL,
+        SIGPWR,
+        SIGSYS,
+    }
+}
+
+impl Into<libc::c_int> for Signal {
+    fn into(self) -> libc::c_int {
+        match self {
+            Self::SIGHUP => libc::SIGHUP,
+            Self::SIGINT => libc::SIGINT,
+            Self::SIGQUIT => libc::SIGQUIT,
+            Self::SIGILL => libc::SIGILL,
+            Self::SIGTRAP => libc::SIGTRAP,
+            Self::SIGABRT => libc::SIGABRT,
+            Self::SIGIOT => libc::SIGIOT,
+            Self::SIGBUS => libc::SIGBUS,
+            Self::SIGFPE => libc::SIGFPE,
+            Self::SIGKILL => libc::SIGKILL,
+            Self::SIGUSR1 => libc::SIGUSR1,
+            Self::SIGSEGV => libc::SIGSEGV,
+            Self::SIGUSR2 => libc::SIGUSR2,
+            Self::SIGPIPE => libc::SIGPIPE,
+            Self::SIGALRM => libc::SIGALRM,
+            Self::SIGTERM => libc::SIGTERM,
+            Self::SIGSTKFLT => libc::SIGSTKFLT,
+            Self::SIGCHLD => libc::SIGCHLD,
+            Self::SIGCONT => libc::SIGCONT,
+            Self::SIGSTOP => libc::SIGSTOP,
+            Self::SIGTSTP => libc::SIGTSTP,
+            Self::SIGTTIN => libc::SIGTTIN,
+            Self::SIGTTOU => libc::SIGTTOU,
+            Self::SIGURG => libc::SIGURG,
+            Self::SIGXCPU => libc::SIGXCPU,
+            Self::SIGXFSZ => libc::SIGXFSZ,
+            Self::SIGVTALRM => libc::SIGVTALRM,
+            Self::SIGPROF => libc::SIGPROF,
+            Self::SIGWINCH => libc::SIGWINCH,
+            Self::SIGIO => libc::SIGIO,
+            Self::SIGPOLL => libc::SIGPOLL,
+            Self::SIGPWR => libc::SIGPWR,
+            Self::SIGSYS => libc::SIGSYS,
         }
-        _ => unreachable!(),
     }
 }
