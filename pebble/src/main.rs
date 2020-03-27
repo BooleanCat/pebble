@@ -84,8 +84,6 @@ fn state(id: &str) {
         clap::Error::with_description(&format!(r#"state "{}": {}"#, id, err), clap::ErrorKind::Io)
             .exit();
     }
-
-    unreachable!();
 }
 
 fn create(id: &str, path: &PathBuf) {
@@ -105,8 +103,6 @@ fn create(id: &str, path: &PathBuf) {
     if let Err(err) = libpebble::create(id, config) {
         clap::Error::with_description(&format!("create: {}", err), clap::ErrorKind::Io).exit();
     }
-
-    unreachable!();
 }
 
 fn start(id: &str) {
@@ -114,8 +110,6 @@ fn start(id: &str) {
         clap::Error::with_description(&format!(r#"start "{}": {}"#, id, err), clap::ErrorKind::Io)
             .exit();
     }
-
-    unreachable!();
 }
 
 fn kill(id: &str, signal: Signal) {
@@ -123,8 +117,6 @@ fn kill(id: &str, signal: Signal) {
         clap::Error::with_description(&format!(r#"kill "{}": {}"#, id, err), clap::ErrorKind::Io)
             .exit();
     }
-
-    unreachable!();
 }
 
 fn delete(id: &str) {
@@ -132,8 +124,6 @@ fn delete(id: &str) {
         clap::Error::with_description(&format!(r#"delete "{}": {}"#, id, err), clap::ErrorKind::Io)
             .exit();
     }
-
-    unreachable!();
 }
 
 arg_enum! {

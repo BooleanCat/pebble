@@ -1,22 +1,10 @@
+mod config;
+
+pub use config::Config;
 use libc;
 use nix::unistd;
-use serde::Deserialize;
 use snafu::{ResultExt, Snafu};
 use std::{fs, io};
-
-#[serde(rename_all = "camelCase")]
-#[derive(Deserialize, Debug)]
-pub struct ConfigRoot {
-    pub path: String,
-    pub read_only: Option<bool>,
-}
-
-#[serde(rename_all = "camelCase")]
-#[derive(Deserialize, Debug)]
-pub struct Config {
-    pub oci_version: String,
-    pub root: ConfigRoot,
-}
 
 #[derive(Debug, Snafu)]
 pub enum Error {
