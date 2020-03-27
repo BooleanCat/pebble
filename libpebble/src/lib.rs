@@ -20,16 +20,16 @@ pub struct Config {
 
 #[derive(Debug, Snafu)]
 pub enum Error {
-    #[snafu_display("not implemented")]
+    #[snafu(display("not implemented"))]
     NotImplemented,
 
-    #[snafu_display("no such container")]
+    #[snafu(display("no such container"))]
     NoSuchContainer,
 
-    #[snafu_display("create directory: {}", "source")]
+    #[snafu(display("create directory: {}", "source"))]
     CreateDirectory { source: io::Error },
 
-    #[snafu_display("change owner: {}", "source")]
+    #[snafu(display("change owner: {}", "source"))]
     ChangeOwner { source: nix::Error },
 }
 
