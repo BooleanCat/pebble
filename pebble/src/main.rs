@@ -18,7 +18,13 @@ struct Opt {
 enum Subcommand {
     #[structopt(no_version)]
     /// Perform one time system setup (requires root)
-    Setup {},
+    Setup {
+        #[structopt(long = "uid", default_value = "0x90000")]
+        uid: libc::uid_t,
+
+        #[structopt(long = "gid", default_value = "0x90000")]
+        gid: libc::gid_t,
+    },
 
     #[structopt(no_version)]
     /// Query the state of a container
@@ -64,7 +70,7 @@ enum Subcommand {
 
 fn main() {
     match Opt::from_args().command {
-        Subcommand::Setup {} => setup(),
+        Subcommand::Setup { uid, gid } => setup(uid, gid),
         Subcommand::State { id } => state(&id),
         Subcommand::Create { id, path } => create(&id, &path),
         Subcommand::Start { id } => start(&id),
@@ -73,8 +79,8 @@ fn main() {
     }
 }
 
-fn setup() {
-    if let Err(err) = libpebble::setup() {
+fn setup(uid: libc::uid_t, gid: libc::gid_t) {
+    if let Err(err) = libpebble::setup(uid, gid) {
         clap::Error::with_description(&format!("setup: {}", err), clap::ErrorKind::Io).exit();
     }
 }

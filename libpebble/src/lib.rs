@@ -3,14 +3,14 @@ mod error;
 
 pub use config::Config;
 pub use error::Error;
-use libc;
+use libc::{c_int, gid_t, uid_t};
 use nix::unistd;
 use snafu::ResultExt;
 use std::{fs, io};
 
 const RUN_DIR: &'static str = "/run/pebble";
 
-pub fn setup() -> Result<(), Error> {
+pub fn setup(uid: uid_t, gid: gid_t) -> Result<(), Error> {
     if let Err(source) = fs::create_dir(RUN_DIR) {
         if source.kind() != io::ErrorKind::AlreadyExists {
             return Err(Error::CreateDirectory {
@@ -20,8 +20,8 @@ pub fn setup() -> Result<(), Error> {
         }
     }
 
-    let uid = unistd::Uid::from_raw(5000);
-    let gid = unistd::Gid::from_raw(5000);
+    let uid = unistd::Uid::from_raw(uid);
+    let gid = unistd::Gid::from_raw(gid);
 
     unistd::chown(RUN_DIR, Some(uid), Some(gid)).context(error::ChangeOwner {
         path: String::from(RUN_DIR),
@@ -42,7 +42,7 @@ pub fn start(_: &str) -> Result<(), Error> {
     Err(Error::NoSuchContainer)
 }
 
-pub fn kill(_: &str, _: libc::c_int) -> Result<(), Error> {
+pub fn kill(_: &str, _: c_int) -> Result<(), Error> {
     Err(Error::NoSuchContainer)
 }
 
