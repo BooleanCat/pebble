@@ -1,0 +1,18 @@
+use snafu::Snafu;
+use std::io;
+
+#[derive(Debug, Snafu)]
+#[snafu(visibility(pub))]
+pub enum Error {
+    #[snafu(display("not implemented"))]
+    NotImplemented,
+
+    #[snafu(display("no such container"))]
+    NoSuchContainer,
+
+    #[snafu(display("create directory: {}", "source"))]
+    CreateDirectory { source: io::Error, path: String },
+
+    #[snafu(display("change owner: {}", "source"))]
+    ChangeOwner { source: nix::Error, path: String },
+}

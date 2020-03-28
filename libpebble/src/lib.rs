@@ -1,25 +1,12 @@
 mod config;
+mod error;
 
 pub use config::Config;
+pub use error::Error;
 use libc;
 use nix::unistd;
-use snafu::{ResultExt, Snafu};
+use snafu::ResultExt;
 use std::{fs, io};
-
-#[derive(Debug, Snafu)]
-pub enum Error {
-    #[snafu(display("not implemented"))]
-    NotImplemented,
-
-    #[snafu(display("no such container"))]
-    NoSuchContainer,
-
-    #[snafu(display("create directory: {}", "source"))]
-    CreateDirectory { source: io::Error, path: String },
-
-    #[snafu(display("change owner: {}", "source"))]
-    ChangeOwner { source: nix::Error, path: String },
-}
 
 pub fn setup() -> Result<(), Error> {
     if let Err(source) = fs::create_dir("/run/pebble") {
@@ -34,7 +21,7 @@ pub fn setup() -> Result<(), Error> {
     let uid = unistd::Uid::from_raw(5000);
     let gid = unistd::Gid::from_raw(5000);
 
-    unistd::chown("/run/pebble", Some(uid), Some(gid)).context(ChangeOwner {
+    unistd::chown("/run/pebble", Some(uid), Some(gid)).context(error::ChangeOwner {
         path: String::from("/run/pebble"),
     })?;
 
