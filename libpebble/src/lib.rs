@@ -8,12 +8,14 @@ use nix::unistd;
 use snafu::ResultExt;
 use std::{fs, io};
 
+const RUN_DIR: &'static str = "/run/pebble";
+
 pub fn setup() -> Result<(), Error> {
-    if let Err(source) = fs::create_dir("/run/pebble") {
+    if let Err(source) = fs::create_dir(RUN_DIR) {
         if source.kind() != io::ErrorKind::AlreadyExists {
             return Err(Error::CreateDirectory {
                 source: source,
-                path: String::from("/run/pebble"),
+                path: String::from(RUN_DIR),
             });
         }
     }
@@ -21,8 +23,8 @@ pub fn setup() -> Result<(), Error> {
     let uid = unistd::Uid::from_raw(5000);
     let gid = unistd::Gid::from_raw(5000);
 
-    unistd::chown("/run/pebble", Some(uid), Some(gid)).context(error::ChangeOwner {
-        path: String::from("/run/pebble"),
+    unistd::chown(RUN_DIR, Some(uid), Some(gid)).context(error::ChangeOwner {
+        path: String::from(RUN_DIR),
     })?;
 
     Ok(())
