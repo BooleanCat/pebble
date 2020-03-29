@@ -1,7 +1,11 @@
 mod config;
+mod create;
+mod delete;
 mod error;
 
 pub use config::Config;
+pub use create::Create;
+pub use delete::Delete;
 pub use error::Error;
 use libc::{c_int, gid_t, uid_t};
 use nix::unistd;
@@ -30,22 +34,20 @@ pub fn setup(uid: uid_t, gid: gid_t) -> Result<(), Error> {
     Ok(())
 }
 
-pub fn state(_: &str) -> Result<(), Error> {
-    Err(Error::NoSuchContainer)
+pub fn state(id: &str) -> Result<(), Error> {
+    Err(Error::NotFound {
+        id: String::from(id),
+    })
 }
 
-pub fn create(_: &str, _: Config) -> Result<(), Error> {
-    Err(Error::NotImplemented)
+pub fn start(id: &str) -> Result<(), Error> {
+    Err(Error::NotFound {
+        id: String::from(id),
+    })
 }
 
-pub fn start(_: &str) -> Result<(), Error> {
-    Err(Error::NoSuchContainer)
-}
-
-pub fn kill(_: &str, _: c_int) -> Result<(), Error> {
-    Err(Error::NoSuchContainer)
-}
-
-pub fn delete(_: &str) -> Result<(), Error> {
-    Err(Error::NoSuchContainer)
+pub fn kill(id: &str, _: c_int) -> Result<(), Error> {
+    Err(Error::NotFound {
+        id: String::from(id),
+    })
 }

@@ -1,7 +1,7 @@
 use libc;
 use libpebble;
 use std::fs::File;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use structopt::StructOpt;
 use structopt::{clap, clap::arg_enum};
 
@@ -10,6 +10,9 @@ use structopt::{clap, clap::arg_enum};
 #[structopt(setting = structopt::clap::AppSettings::ColoredHelp)]
 /// An OCI container runtime
 struct Opt {
+    #[structopt(long = "root-dir", parse(from_os_str), default_value = "/run/pebble")]
+    root_dir: PathBuf,
+
     #[structopt(subcommand)]
     command: Subcommand,
 }
@@ -69,13 +72,15 @@ enum Subcommand {
 }
 
 fn main() {
-    match Opt::from_args().command {
+    let opt = Opt::from_args();
+
+    match opt.command {
         Subcommand::Setup { uid, gid } => setup(uid, gid),
         Subcommand::State { id } => state(&id),
-        Subcommand::Create { id, path } => create(&id, &path),
+        Subcommand::Create { id, path } => create(&opt.root_dir, &id, &path),
         Subcommand::Start { id } => start(&id),
         Subcommand::Kill { id, signal } => kill(&id, signal),
-        Subcommand::Delete { id } => delete(&id),
+        Subcommand::Delete { id } => delete(&opt.root_dir, &id),
     }
 }
 
@@ -92,7 +97,7 @@ fn state(id: &str) {
     }
 }
 
-fn create(id: &str, path: &PathBuf) {
+fn create(root_dir: &Path, id: &str, path: &PathBuf) {
     let file = File::open(path).unwrap_or_else(|err| {
         clap::Error::with_description(&format!("open {:?}: {}", path, err), clap::ErrorKind::Io)
             .exit()
@@ -106,7 +111,7 @@ fn create(id: &str, path: &PathBuf) {
         .exit()
     });
 
-    if let Err(err) = libpebble::create(id, config) {
+    if let Err(err) = libpebble::Create::new(root_dir).create(id, config) {
         clap::Error::with_description(&format!("create: {}", err), clap::ErrorKind::Io).exit();
     }
 }
@@ -125,10 +130,9 @@ fn kill(id: &str, signal: Signal) {
     }
 }
 
-fn delete(id: &str) {
-    if let Err(err) = libpebble::delete(id) {
-        clap::Error::with_description(&format!(r#"delete "{}": {}"#, id, err), clap::ErrorKind::Io)
-            .exit();
+fn delete(root_dir: &Path, id: &str) {
+    if let Err(err) = libpebble::Delete::new(root_dir).delete(id) {
+        clap::Error::with_description(&format!(r#"delete: {}"#, err), clap::ErrorKind::Io).exit();
     }
 }
 
